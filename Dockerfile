@@ -1,4 +1,4 @@
-FROM xrdp
+FROM deskor/xrdp
 MAINTAINER Sven Dowideit <SvenDowideit@home.org.au> @SvenDowideit
 
 ENV USERNAME dockerx
