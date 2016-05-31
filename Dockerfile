@@ -49,3 +49,4 @@ RUN npm --version \
 # OMG. https://github.com/Microsoft/vscode/issues/3451#issuecomment-199090068
 RUN sed -i 's/BIG-REQUESTS/_IG-REQUESTS/' /usr/lib/x86_64-linux-gnu/libxcb.so.1
 
+CMD ["/usr/local/bin/code"]
