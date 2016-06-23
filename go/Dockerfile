@@ -1,16 +1,21 @@
-FROM deskor/xrdp
+FROM deskor/vscode:latest
 MAINTAINER Sven Dowideit <SvenDowideit@home.org.au> @SvenDowideit
 
+# legacy of the work Sven did in 2013
+# TODO: remove
 ENV USERNAME dockerx
 ENV HOME /home/$USERNAME
 
-# Setup for non-interactive install
-ENV DEBIAN_FRONTEND noninteractive
-
 # Update all the package references available for download
 RUN apt-get update \
-	&& apt-get install -y \
-	python-software-properties software-properties-common gcc-4.9 git make wget
+	&& apt-get install -yq \
+	python-software-properties software-properties-common gcc-4.9 git make wget \
+	libgtk2.0-0 \
+	libgconf-2-4 \
+	libasound2 \
+	libxtst6 \
+	libnss3 \
+	libnotify-bin
 
 # Switch to non-root user
 USER $USERNAME
@@ -58,40 +63,6 @@ USER $USERNAME
 #FROM base-gdec-gui
 #MAINTAINER James C. Scott III <jcscott.iii@gmail.com>
 
-# Change to root to install more dependencies
-USER root
-# Make sure to download newer version of node than what is the default in apt-get
-# Install other dependencies
-RUN apt-get install -y curl
-#RUN curl -sL https://deb.nodesource.com/setup | sudo -E bash -
-RUN curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -
-RUN apt-get install -y \
-    nodejs \
-    zip
-
-
-# Change back to non-root user
-USER $USERNAME
-
-# Switch npm prefix to prevent using sudo.
-RUN mkdir $HOME/.npm-global
-ENV NPM_CONFIG_PREFIX $HOME/.npm-global
-ENV PATH $HOME/.npm-global/bin:$PATH
-
-# Install VSCode
-#RUN wget -O $HOME/VSCode.zip 'https://az764295.vo.msecnd.net/public/0.10.3/VSCode-linux64.zip'
-# https://go.microsoft.com/fwlink/?LinkID=620884
-RUN wget -O $HOME/VSCode.zip 'https://go.microsoft.com/fwlink/?LinkID=620884'
-RUN unzip $HOME/VSCode.zip -d $HOME/vscode/
-RUN ln -s $HOME/vscode/VSCode-linux-x64/Code $HOME/bin/code
-
-USER root
-
-# Install vsce, the Visual Studio Extension Manager
-RUN npm install -g vsce
-RUN npm --version \
-	&& which vsce
-
 USER $USERNAME
 
 # Install the vscode-go extension
@@ -115,19 +86,3 @@ USER root
 RUN chown -R $USERNAME:$USERNAME $HOME/.config/Code/User/settings.json
 
 
-# xrdp_sec_incoming: error reading /etc/xrdp/rsakeys.ini file
-#RUN xrdp-keygen xrdp /etc/xrdp/rsakeys.ini
-
-RUN apt-get install -y \
-    libgtk2.0-0 \
-    libgconf-2-4 \
-    libasound2 \
-    libxtst6 \
-    libnss3
-
-RUN apt-get clean
-
-# OMG. https://github.com/Microsoft/vscode/issues/3451#issuecomment-199090068
-RUN sed -i 's/BIG-REQUESTS/_IG-REQUESTS/' /usr/lib/x86_64-linux-gnu/libxcb.so.1
-
-RUN apt-get install -yq libnotify-bin
